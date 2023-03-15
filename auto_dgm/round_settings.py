@@ -104,13 +104,13 @@ class RoundSettings:
     def __init__(self,
                  round_id,
                  date: datetime.datetime,
-                 max_players_in_group: int,
                  configs: typing.Sequence[AutoFillGroupTimeConfig] = None,
+                 max_players_in_group: int = None,
                  ):
         configs = configs or []
         has_group_settings = len(configs) > 0
         self.round_id = round_id
-        self._group_settings = self._create_group_settings(max_players_in_group, configs) if has_group_settings else None
+        self._group_settings = self._create_group_settings(configs, max_players_in_group) if has_group_settings else None
         self._registration_settings = self._create_registration_settings(date, ask_for_group=has_group_settings)
         self._registration_results_settings = self._create_registration_results_settings()
 
@@ -132,15 +132,19 @@ class RoundSettings:
         return self._registration_results_settings
 
     def _create_group_settings(self,
-                               max_players_in_group: int,
-                               configs: typing.Sequence[AutoFillGroupTimeConfig]):
+                               configs: typing.Sequence[AutoFillGroupTimeConfig],
+                               max_players_in_group: int = None):
         number_of_groups = sum(config.number_of_groups for config in configs)
         settings = [
             SetNumberOfGroupsSetting(field_id='i01', value=number_of_groups),
             ComboBoxSetting(field_id='i02', value=GroupStart.FLEX.value),
-            ComboBoxSetting(field_id='i03', value=max_players_in_group),
-            AutoFillGroupTimesSetting(*configs)
         ]
+
+        if max_players_in_group:
+            settings += [ComboBoxSetting(field_id='i03', value=max_players_in_group)]
+
+        settings += [AutoFillGroupTimesSetting(*configs)]
+
         return BundledSetting(
             "Groups",
             "competition_edit_groups",
