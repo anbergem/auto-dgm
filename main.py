@@ -52,8 +52,11 @@ def login(site: ad.Site):
     time.sleep(2)
 
 
-def main(config, first_date: datetime.datetime, week_idx: int):
-    driver = webdriver.Chrome(service=selenium.webdriver.chrome.service.Service(ChromeDriverManager().install()))
+def main(config, first_date: datetime.datetime, week_idx: int, headless: bool = False):
+    options = webdriver.ChromeOptions()
+    options.headless = headless
+    driver = webdriver.Chrome(service=selenium.webdriver.chrome.service.Service(ChromeDriverManager().install()),
+                              options=options)
     site = ad.Site(driver, "https://discgolfmetrix.com/")
     parent_id = config["main_event_id"]
 
@@ -94,11 +97,15 @@ if __name__ == '__main__':
     parser.add_argument("--start-date",
                         type=lambda s: datetime.datetime.strptime(s, '%Y-%m-%d'),
                         help="The start date for the first week")
-    parser.add_argument("--week", type=int, help="The 0-based index for the event")
+    parser.add_argument("--week", type=int, help="The week number for the event. The first week has value 1")
+    parser.add_argument("--headless", action="store_true", help="Run the application without showing GUI")
 
     args = parser.parse_args()
 
     with open(args.config) as file:
         yaml_config = yaml.safe_load(file)
 
-    main(yaml_config, args.start_date, args.week)
+    if args.week < 1:
+        raise ValueError(f"The first week is week 1: {args.week}")
+
+    main(yaml_config, args.start_date, args.week - 1, args.headless)
