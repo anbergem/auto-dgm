@@ -2,3 +2,6 @@
 __pycache__/
 config/*.yml
 !config/config.sample.yml
+
+.env*
+!.env.sample

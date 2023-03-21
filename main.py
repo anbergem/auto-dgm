@@ -1,11 +1,17 @@
 import datetime
+import getpass
+import os
+import time
 
+import dotenv
 import selenium.webdriver.chrome.service
 import yaml
 from selenium import webdriver
 from webdriver_manager.chrome import ChromeDriverManager
 
 import auto_dgm as ad
+
+dotenv.load_dotenv()
 
 
 def parse_timestamp(timestamp: str):
@@ -27,12 +33,31 @@ def get_start_time(round) -> datetime.time:
     return parse_timestamp(start_time).time()
 
 
+def login(site: ad.Site):
+    site.go_to("u=login")
+
+    username = os.getenv("DGM_USERNAME", None)
+    if not username:
+        username = input("Username: ")
+
+    password = os.getenv("DGM_PASSWORD", None)
+    if not password:
+        password = getpass.getpass()
+
+    field = site.get_field_by_id("i01")
+    field.send_keys(username)
+    field = site.get_field_by_id("i02")
+    field.send_keys(password)
+    site.submit()
+    time.sleep(2)
+
+
 def main(config, first_date: datetime.datetime, week_idx: int):
     driver = webdriver.Chrome(service=selenium.webdriver.chrome.service.Service(ChromeDriverManager().install()))
     site = ad.Site(driver, "https://discgolfmetrix.com/")
     parent_id = config["main_event_id"]
-    site.go_to("u=login")
-    input("Please login...")
+
+    login(site)
 
     creator = ad.RoundMaker(site, parent_id)
     setter = ad.Setter(site)
