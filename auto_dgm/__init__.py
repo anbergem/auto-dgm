@@ -1,5 +1,5 @@
 from .round_maker import RoundMaker
-from .round_settings import RoundSettings, AutoFillGroupTimeConfig
+from .round_settings import Registration, RoundSettings, AutoFillGroupTimeConfig
 from .settings import (
     ClickFieldSetting, Setter, Site, Setting, DateSetting, TimeSetting, ComboBoxSetting, WaitSetting, SubmissionSetting
 )

@@ -2,6 +2,7 @@ import datetime
 import getpass
 import os
 import time
+import typing
 
 import dotenv
 import selenium.webdriver.chrome.service
@@ -52,6 +53,25 @@ def login(site: ad.Site):
     time.sleep(2)
 
 
+def get_registration(round: typing.Dict, event_date: datetime.datetime) -> ad.Registration:
+    """
+    :param round: The round configuration, where the only overridable setting is the registration end time.
+    :param event_date: The event date, used as default.
+    :return: Return the registration based on the round configuration, if present. Default
+    to the event date - 6 days at midnight for start and the event date 23:00 as end.
+    """
+    registration_start = event_date - datetime.timedelta(days=6)
+    registration_end = event_date.replace(hour=23)
+
+    if "registration" in round:
+        # Todo: Add start time configuration?
+        if "end_time" in round["registration"]:
+            end_time = parse_timestamp(round["registration"]["end_time"])
+            registration_end = registration_end.replace(hour=end_time.hour, minute=end_time.minute)
+
+    return ad.Registration(registration_start, registration_end)
+
+
 def main(config, first_date: datetime.datetime, week_idx: int, headless: bool = False):
     options = webdriver.ChromeOptions()
     options.headless = headless
@@ -84,7 +104,9 @@ def main(config, first_date: datetime.datetime, week_idx: int, headless: bool = 
 
         max_players_in_group = round.get("max_players_in_group", None)
 
-        settings = ad.RoundSettings(round_id, date, group_configs, max_players_in_group)
+        registration = get_registration(round, date)
+
+        settings = ad.RoundSettings(round_id, registration, group_configs, max_players_in_group)
         for setting in settings:
             setter.set(setting.path, *setting.settings)
 

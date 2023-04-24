@@ -100,10 +100,16 @@ class SetNumberOfGroupsSetting(Setting):
         time.sleep(3)
 
 
+@dataclasses.dataclass
+class Registration:
+    start: datetime.datetime
+    end: datetime.datetime
+
+
 class RoundSettings:
     def __init__(self,
                  round_id,
-                 date: datetime.datetime,
+                 registration: Registration,
                  configs: typing.Sequence[AutoFillGroupTimeConfig] = None,
                  max_players_in_group: int = None,
                  ):
@@ -111,7 +117,7 @@ class RoundSettings:
         has_group_settings = len(configs) > 0
         self.round_id = round_id
         self._group_settings = self._create_group_settings(configs, max_players_in_group) if has_group_settings else None
-        self._registration_settings = self._create_registration_settings(date, ask_for_group=has_group_settings)
+        self._registration_settings = self._create_registration_settings(registration, ask_for_group=has_group_settings)
         self._registration_results_settings = self._create_registration_results_settings()
 
     def __iter__(self) -> typing.Iterable[BundledSetting]:
@@ -152,15 +158,13 @@ class RoundSettings:
             settings
         )
 
-    def _create_registration_settings(self, date: datetime.datetime, *, ask_for_group: bool):
-        registration_start = date - datetime.timedelta(days=6)
-        registration_end = date.replace(hour=23)
+    def _create_registration_settings(self, registration: Registration, *, ask_for_group: bool):
         settings = [
             ClickFieldSetting('id_registration_yes1'),
-            DateSetting('i01', registration_start),
-            TimeSetting('i02', registration_start),
-            DateSetting('i03', registration_end),
-            TimeSetting('i04', registration_end),
+            DateSetting('i01', registration.start),
+            TimeSetting('i02', registration.start),
+            DateSetting('i03', registration.end),
+            TimeSetting('i04', registration.end),
         ]
 
         if ask_for_group:

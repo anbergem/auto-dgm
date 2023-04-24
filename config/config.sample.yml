@@ -16,3 +16,5 @@ rounds:
   - title: Joint Start
     start_time: '17:00'
     comment:
+    registration:
+      end_time: '16:30'
