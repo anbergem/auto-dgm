@@ -88,6 +88,10 @@ def main(config, first_date: datetime.datetime, week_idx: int, headless: bool = 
     date = first_date.replace(hour=0, minute=0, second=0) + datetime.timedelta(days=week_idx * 7)
     weekly_round_id = creator.create_multi_round_event(parent_id, date, config["title_template"].format(week_idx + 1), config["comment"])
 
+    weekly_round_settings = ad.WeeklyRoundSettings(weekly_round_id, config["is_weeklies"])
+    for setting in weekly_round_settings:
+        setter.set(setting.path, *setting.settings)
+
     for round in config["rounds"]:
         start_time = get_start_time(round)
         timedelta = datetime.timedelta(hours=start_time.hour, minutes=start_time.minute)

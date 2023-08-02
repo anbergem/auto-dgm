@@ -62,9 +62,6 @@ class TimeSetting(Setting):
 
 
 class SubmissionSetting(Setting):
-    def __init__(self, id):
-        self.id = id
-
     def set(self, site: Site):
         site.submit()
 

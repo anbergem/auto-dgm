@@ -1,6 +1,7 @@
 title_template: 'Round {}'
 main_event_id:
 comment:
+is_weeklies:
 rounds:
   - title: 'Flex'
     comment:

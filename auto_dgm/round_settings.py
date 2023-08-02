@@ -106,6 +106,28 @@ class Registration:
     end: datetime.datetime
 
 
+class WeeklyRoundSettings:
+    def __init__(self, round_id: str, is_weeklies: bool):
+        self._basic_settings = self._create_basic_settings(round_id) if is_weeklies else None
+
+    def __iter__(self):
+        settings = [self._basic_settings] if self._basic_settings else []
+        return iter(settings)
+
+    @staticmethod
+    def _create_basic_settings(round_id: str):
+        settings = [
+            ClickFieldSetting("id_weekly1"),
+            SubmissionSetting(),
+        ]
+        return BundledSetting(
+            "Basic",
+            "competition_edit",
+            round_id,
+            settings,
+        )
+
+
 class RoundSettings:
     def __init__(self,
                  round_id,
@@ -171,7 +193,7 @@ class RoundSettings:
             # Note: Groups have to be defined before we can ask for them
             settings.append(CustomAccordianSetting('id_ask_group'))
 
-        settings.append(SubmissionSetting("id_registration_yes1"))
+        settings.append(SubmissionSetting())
 
         return BundledSetting(
             "Registration",
